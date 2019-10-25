@@ -67,7 +67,11 @@ class Inbox(QWidget):
         # scroll area
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setWidget(self.scrollWidget)
-    
+
+    def mousePressEvent(self, event):
+        for i in range(self.scrollLayout.rowCount()):
+            self.scrollLayout.itemAt(i).hide_adds()
+        print('inbox field clicked')
     
     def add_part(self):
         self.scrollLayout.addRow(Part())
@@ -88,27 +92,32 @@ class Part(QWidget):
         self.lineEdit.setStyleSheet("padding:5px;")
         self.lineEdit.clicked.connect(self.text_edit_clicked)
 
-        self.verticalLayout.addWidget(self.lineEdit, 0)
-        self.setLayout(self.verticalLayout)
+        self.gridLayout.addWidget(self.lineEdit, 0, 1)
+        self.setLayout(self.gridLayout)
         self.lineEdit.setReadOnly(True)
         self.textEdit.hide()
+        
+        self.pushButton.clicked.connect(self.hide_adds)
 
     def text_edit_clicked(self):
         self.textEdit.show()
         self.lineEdit.setReadOnly(False)
-        self.setStyleSheet("background-color: rgb(213, 224, 252)")
-        self.lineEdit.setStyleSheet("padding:5px;border-radius: 8px;")
+        self.lineEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
+        self.textEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
+
+    def hide_adds(self):
+        self.lineEdit.setReadOnly(True)
+        self.lineEdit.setStyleSheet("background-color: rgb(249, 250, 251); padding:5px;border-radius: 8px;")
+        self.textEdit.hide()
 
     def mousePressEvent(self, event):
         print('1 click')
-        if event.button() == Qt.LeftButton:
-            self.setStyleSheet("background-color: rgb(213, 224, 252)")
     
     def mouseDoubleClickEvent(self, event):   
         print('2 click!')
         self.textEdit.show()
         self.lineEdit.setReadOnly(False)
-        self.verticalLayout.addWidget(QPushButton())
+        self.gridLayout.addWidget(QPushButton())
 
 
 class cQLineEdit(QLineEdit):
