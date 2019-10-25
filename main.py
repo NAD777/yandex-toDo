@@ -1,7 +1,7 @@
 import sys
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QVBoxLayout, QPushButton, QFormLayout, QVBoxLayout, QLineEdit
 import csv
 import sqlite3
 
@@ -57,9 +57,20 @@ class Inbox(QWidget):
         super().__init__()
         uic.loadUi('inbox_widget.ui', self)
         self.add_btn.clicked.connect(self.add_part)
+        # scroll area widget contents - layout
+        self.scrollLayout = QFormLayout()
+
+        # scroll area widget contents
+        self.scrollWidget = QWidget()
+        self.scrollWidget.setLayout(self.scrollLayout)
+
+        # scroll area
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setWidget(self.scrollWidget)
+    
     
     def add_part(self):
-        self.verticalLayout.addWidget(Part())
+        self.scrollLayout.addRow(Part())
 
 
 class Today(QWidget):
@@ -72,7 +83,22 @@ class Part(QWidget):
     def __init__(self):
         super().__init__()
         uic.loadUi('part.ui', self)
-    
+        self.lineEdit = cQLineEdit(self)
+        self.lineEdit.setText('123123')
+        self.lineEdit.setStyleSheet("padding:5px;")
+        self.lineEdit.clicked.connect(self.text_edit_clicked)
+
+        self.verticalLayout.addWidget(self.lineEdit, 0)
+        self.setLayout(self.verticalLayout)
+        self.lineEdit.setReadOnly(True)
+        self.textEdit.hide()
+
+    def text_edit_clicked(self):
+        self.textEdit.show()
+        self.lineEdit.setReadOnly(False)
+        self.setStyleSheet("background-color: rgb(213, 224, 252)")
+        self.lineEdit.setStyleSheet("padding:5px;border-radius: 8px;")
+
     def mousePressEvent(self, event):
         print('1 click')
         if event.button() == Qt.LeftButton:
@@ -80,8 +106,20 @@ class Part(QWidget):
     
     def mouseDoubleClickEvent(self, event):   
         print('2 click!')
+        self.textEdit.show()
+        self.lineEdit.setReadOnly(False)
         self.verticalLayout.addWidget(QPushButton())
+
+
+class cQLineEdit(QLineEdit):
+    clicked = pyqtSignal()
+
+    def __init__(self, widget):
+        super().__init__(widget)
     
+    def mousePressEvent(self, QMouseEvent):
+        self.clicked.emit()
+
 
 app = QApplication(sys.argv)
 ex = MainWindow()
