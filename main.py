@@ -17,33 +17,33 @@ class MainWindow(QMainWindow):
     
     def open_inbox(self):
         self.clear_highlights()
-        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232);")
+        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
         self.verticalLayout.addWidget(Inbox())
         # self.content.setWidget(Example())
 
     def open_today(self):
         self.clear_highlights()
-        self.today_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232);")
+        self.today_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
         self.verticalLayout.addWidget(Today())
         # self.content.setWidget(Example())
     
     def open_plans(self):
         self.clear_highlights()
-        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232);")
+        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
         self.verticalLayout.addWidget(Part())
     
     def open_logbook(self):
         self.clear_highlights()
-        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232);")
+        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
     
     def clear_highlights(self):
-        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251)")
-        self.today_btn.setStyleSheet("padding:5px;border:none; background-color: rgb(249, 250, 251)")
-        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251)")
-        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251)")
+        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(239, 240, 241);")
+        self.today_btn.setStyleSheet("padding:5px;border:none; background-color: rgb(239, 240, 241);")
+        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(239, 240, 241);")
+        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(239, 240, 241);")
 
     def clearLayout(self, layout):
         while layout.count():
