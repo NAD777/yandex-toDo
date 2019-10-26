@@ -23,7 +23,7 @@
       <x>140</x>
       <y>0</y>
       <width>601</width>
-      <height>471</height>
+      <height>481</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout"/>
@@ -32,7 +32,7 @@
     <property name="geometry">
      <rect>
       <x>-10</x>
-      <y>-30</y>
+      <y>-40</y>
       <width>141</width>
       <height>511</height>
      </rect>
@@ -53,7 +53,7 @@
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(239, 240, 241);
+      <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
 padding:5px;</string>
      </property>
@@ -71,7 +71,7 @@ padding:5px;</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(239, 240, 241);
+      <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
 padding:5px;</string>
      </property>
@@ -89,7 +89,7 @@ padding:5px;</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(239, 240, 241);
+      <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
 padding:5px;
 border-radius: 8px;</string>
@@ -112,7 +112,7 @@ border-radius: 8px;</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(239, 240, 241);
+      <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
 padding:5px;</string>
      </property>

@@ -40,10 +40,10 @@ class MainWindow(QMainWindow):
         self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
     
     def clear_highlights(self):
-        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(239, 240, 241);")
-        self.today_btn.setStyleSheet("padding:5px;border:none; background-color: rgb(239, 240, 241);")
-        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(239, 240, 241);")
-        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(239, 240, 241);")
+        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251);")
+        self.today_btn.setStyleSheet("padding:5px;border:none; background-color: rgb(249, 250, 251);")
+        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251);")
+        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251);")
 
     def clearLayout(self, layout):
         while layout.count():
@@ -57,6 +57,7 @@ class Inbox(QWidget):
         super().__init__()
         uic.loadUi('inbox_widget.ui', self)
         self.add_btn.clicked.connect(self.add_part)
+        self.refresh_btn.clicked.connect(self.refresh)
         # scroll area widget contents - layout
         self.scrollLayout = QFormLayout()
 
@@ -68,13 +69,29 @@ class Inbox(QWidget):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setWidget(self.scrollWidget)
 
+        self.con = sqlite3.connect('database.db')
+        self.cur = self.con.cursor()
+        self.refresh()
+        
+    def refresh(self):
+        res = self.cur.execute("""SELECT * FROM Inbox""")
+        for el in res:
+            self.scrollLayout.addRow(Part(el[0], el[1], el[2]))
+    
+    def remove_done(self):
+        for i in range(self.scrollLayout.rowCount()):
+            if self.scrollLayout.itemAt(i).widget().is_checked():
+                pass
+    
     def mousePressEvent(self, event):
         for i in range(self.scrollLayout.rowCount()):
-            self.scrollLayout.itemAt(i).hide_adds()
+            self.scrollLayout.itemAt(i).widget().hide_adds()
         print('inbox field clicked')
     
     def add_part(self):
-        self.scrollLayout.addRow(Part())
+        part = Part()
+        self.scrollLayout.addRow(part)
+        part.text_edit_clicked()
 
 
 class Today(QWidget):
@@ -84,11 +101,14 @@ class Today(QWidget):
 
 
 class Part(QWidget):
-    def __init__(self):
+    def __init__(self, id=None, text=None, desr=None):
         super().__init__()
+        self.id = id
+        self.text = text
+        self.desr = desr
+
         uic.loadUi('part.ui', self)
         self.lineEdit = cQLineEdit(self)
-        self.lineEdit.setText('123123')
         self.lineEdit.setStyleSheet("padding:5px;")
         self.lineEdit.clicked.connect(self.text_edit_clicked)
 
@@ -96,8 +116,17 @@ class Part(QWidget):
         self.setLayout(self.gridLayout)
         self.lineEdit.setReadOnly(True)
         self.textEdit.hide()
+
+        if self.text is not None:
+            self.lineEdit.setText(self.text)
         
-        self.pushButton.clicked.connect(self.hide_adds)
+        if self.desr is not None:
+            self.textEdit.setText(self.desr)
+
+    def is_checked(self):
+        if self.checkBox == Qt.Checked:
+            return True
+        return False
 
     def text_edit_clicked(self):
         self.textEdit.show()
@@ -125,6 +154,7 @@ class cQLineEdit(QLineEdit):
 
     def __init__(self, widget):
         super().__init__(widget)
+        self.setPlaceholderText('Новая задача')
     
     def mousePressEvent(self, QMouseEvent):
         self.clicked.emit()
