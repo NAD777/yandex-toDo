@@ -74,6 +74,8 @@ class Inbox(QWidget):
         self.refresh()
         
     def refresh(self):
+        while self.scrollLayout.itemAt(0) is not None:
+            self.scrollLayout.removeRow(0)
         res = self.cur.execute("""SELECT * FROM Inbox""")
         for el in res:
             self.scrollLayout.addRow(Part(el[0], el[1], el[2]))
