@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>444</width>
+    <width>479</width>
     <height>169</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>431</width>
+     <width>461</width>
      <height>134</height>
     </rect>
    </property>
@@ -52,6 +52,17 @@ p, li { white-space: pre-wrap; }
       </property>
       <property name="placeholderText">
        <string>Заметка</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QPushButton" name="delete_btn">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>icons/delete.png</normaloff>icons/delete.png</iconset>
       </property>
      </widget>
     </item>

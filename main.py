@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QVBoxLayout, QPushButton, QFormLayout, QVBoxLayout, QLineEdit
+from PyQt5.QtWidgets import QInputDialog, QMessageBox
 import csv
 import sqlite3
 
@@ -121,6 +122,9 @@ class Part(QWidget):
         self.setLayout(self.gridLayout)
         self.lineEdit.setReadOnly(True)
         self.textEdit.hide()
+        
+        self.delete_btn.hide()
+        self.delete_btn.clicked.connect(self.delete)
 
         if self.text is not None:
             self.text = str(self.text)
@@ -130,9 +134,22 @@ class Part(QWidget):
             self.desr = str(self.desr)
             self.textEdit.setText(self.desr)
 
+        self.will_delete = False
+
+    def delete(self):
+        reply = QMessageBox.question(self, '', "Удалить?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.will_delete = True
+            
     def update(self):
-        if self.text != self.lineEdit.text() or self.desr != self.textEdit.toPlainText():
-            if self.id is not None:
+        if self.will_delete:
+            self.con = sqlite3.connect('database.db')
+            self.cur = self.con.cursor()
+            self.cur.execute(f"""DELETE FROM Inbox WHERE id = '{self.id}'""")
+            self.con.commit()
+        
+        elif self.text != self.lineEdit.text() or self.desr != self.textEdit.toPlainText():
+            if self.id is not None and not self.will_delete:
                 self.con = sqlite3.connect('database.db')
                 self.cur = self.con.cursor()
                 self.cur.execute(f"""UPDATE Inbox SET text = '{self.lineEdit.text()}', description = '{self.textEdit.toPlainText()}' WHERE id = '{self.id}'""")
@@ -152,6 +169,7 @@ class Part(QWidget):
 
     def text_edit_clicked(self):
         self.textEdit.show()
+        self.delete_btn.show()
         self.lineEdit.setReadOnly(False)
         self.lineEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
         self.textEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
@@ -160,6 +178,7 @@ class Part(QWidget):
         self.lineEdit.setReadOnly(True)
         self.lineEdit.setStyleSheet("background-color: rgb(249, 250, 251); padding:5px;border-radius: 8px;")
         self.textEdit.hide()
+        self.delete_btn.hide()
 
     def mousePressEvent(self, event):
         print('1 click')
