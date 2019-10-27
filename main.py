@@ -88,9 +88,6 @@ class Inbox(QWidget):
                 pass
     
     def mousePressEvent(self, event):
-        # for i in range(self.scrollLayout.rowCount()):
-            # self.scrollLayout.itemAt(i).widget().update()
-            # self.scrollLayout.itemAt(i).widget().hide_adds()
         self.refresh()
         print('inbox field clicked')
     
@@ -139,6 +136,7 @@ class Part(QWidget):
     def delete(self):
         reply = QMessageBox.question(self, '', "Удалить?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
+            self.hide()
             self.will_delete = True
             
     def update(self):
