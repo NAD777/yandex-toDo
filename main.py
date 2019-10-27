@@ -75,6 +75,7 @@ class Inbox(QWidget):
         
     def refresh(self):
         while self.scrollLayout.itemAt(0) is not None:
+            self.scrollLayout.itemAt(0).widget().update()
             self.scrollLayout.removeRow(0)
         res = self.cur.execute("""SELECT * FROM Inbox""")
         for el in res:
@@ -86,8 +87,10 @@ class Inbox(QWidget):
                 pass
     
     def mousePressEvent(self, event):
-        for i in range(self.scrollLayout.rowCount()):
-            self.scrollLayout.itemAt(i).widget().hide_adds()
+        # for i in range(self.scrollLayout.rowCount()):
+            # self.scrollLayout.itemAt(i).widget().update()
+            # self.scrollLayout.itemAt(i).widget().hide_adds()
+        self.refresh()
         print('inbox field clicked')
     
     def add_part(self):
@@ -120,10 +123,27 @@ class Part(QWidget):
         self.textEdit.hide()
 
         if self.text is not None:
+            self.text = str(self.text)
             self.lineEdit.setText(self.text)
         
         if self.desr is not None:
+            self.desr = str(self.desr)
             self.textEdit.setText(self.desr)
+
+    def update(self):
+        if self.text != self.lineEdit.text() or self.desr != self.textEdit.toPlainText():
+            if self.id is not None:
+                self.con = sqlite3.connect('database.db')
+                self.cur = self.con.cursor()
+                self.cur.execute(f"""UPDATE Inbox SET text = '{self.lineEdit.text()}', description = '{self.textEdit.toPlainText()}' WHERE id = '{self.id}'""")
+                self.con.commit()
+            else:
+                self.con = sqlite3.connect('database.db')
+                self.cur = self.con.cursor()
+                self.lineEdit_text = self.lineEdit.text()
+                self.textEdit_text = self.textEdit.toPlainText()
+                self.cur.execute(f"""INSERT INTO Inbox(text, description) VALUES('{self.lineEdit_text}', '{self.textEdit_text}')""")
+                self.con.commit()
 
     def is_checked(self):
         if self.checkBox == Qt.Checked:
@@ -159,6 +179,7 @@ class cQLineEdit(QLineEdit):
         self.setPlaceholderText('Новая задача')
     
     def mousePressEvent(self, QMouseEvent):
+        print(self.text())
         self.clicked.emit()
 
 
