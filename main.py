@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QVBoxLayout, QPushButton, QFormLayout, QVBoxLayout, QLineEdit
 from PyQt5.QtWidgets import QInputDialog, QMessageBox
@@ -78,7 +78,7 @@ class Inbox(QWidget):
         while self.scrollLayout.itemAt(0) is not None:
             self.scrollLayout.itemAt(0).widget().update()
             self.scrollLayout.removeRow(0)
-        res = self.cur.execute("""SELECT * FROM Inbox""")
+        res = self.cur.execute("""SELECT * FROM Inbox WHERE type = '1'""")
         for el in res:
             self.scrollLayout.addRow(Part(el[0], el[1], el[2]))
     
@@ -131,7 +131,22 @@ class Part(QWidget):
             self.desr = str(self.desr)
             self.textEdit.setText(self.desr)
 
+        self.checkBox.stateChanged.connect(self.to_done)
+
         self.will_delete = False
+
+        self.is_showing = True
+
+    def to_done(self):
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.time_out)
+        self.timer.start(2000)
+
+    def time_out(self):
+        if self.checkBox.isChecked():
+            self.is_showing = False
+            print("Part hidden")
+            self.hide()
 
     def delete(self):
         reply = QMessageBox.question(self, '', "Удалить?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -157,7 +172,7 @@ class Part(QWidget):
                 self.cur = self.con.cursor()
                 self.lineEdit_text = self.lineEdit.text()
                 self.textEdit_text = self.textEdit.toPlainText()
-                self.cur.execute(f"""INSERT INTO Inbox(text, description) VALUES('{self.lineEdit_text}', '{self.textEdit_text}')""")
+                self.cur.execute(f"""INSERT INTO Inbox(text, description, type) VALUES('{self.lineEdit_text}', '{self.textEdit_text}', '1')""")
                 self.con.commit()
 
     def is_checked(self):
@@ -166,11 +181,12 @@ class Part(QWidget):
         return False
 
     def text_edit_clicked(self):
-        self.textEdit.show()
-        self.delete_btn.show()
-        self.lineEdit.setReadOnly(False)
-        self.lineEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
-        self.textEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
+        if self.is_showing: 
+            self.textEdit.show()
+            self.delete_btn.show()
+            self.lineEdit.setReadOnly(False)
+            self.lineEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
+            self.textEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
 
     def hide_adds(self):
         self.lineEdit.setReadOnly(True)

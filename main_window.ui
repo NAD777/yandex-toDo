@@ -55,7 +55,8 @@
      <property name="styleSheet">
       <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
-padding:5px;</string>
+padding:5px;
+border-radius: 8px;</string>
      </property>
      <property name="text">
       <string>Сегодня </string>
@@ -73,7 +74,8 @@ padding:5px;</string>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
-padding:5px;</string>
+padding:5px;
+border-radius: 8px;</string>
      </property>
      <property name="text">
       <string>Журнал</string>
@@ -114,7 +116,8 @@ border-radius: 8px;</string>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
-padding:5px;</string>
+padding:5px;
+border-radius: 8px;</string>
      </property>
      <property name="text">
       <string>Планы</string>
