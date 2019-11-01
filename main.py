@@ -15,6 +15,7 @@ class MainWindow(QMainWindow):
         self.today_btn.clicked.connect(self.open_today)
         self.plans_btn.clicked.connect(self.open_plans)
         self.logbook_btn.clicked.connect(self.open_logbook)
+        self.open_inbox()
     
     def open_inbox(self):
         self.clear_highlights()
@@ -39,6 +40,8 @@ class MainWindow(QMainWindow):
     def open_logbook(self):
         self.clear_highlights()
         self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
+        self.clearLayout(self.verticalLayout)
+        self.verticalLayout.addWidget(Done())
     
     def clear_highlights(self):
         self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
@@ -72,20 +75,21 @@ class Inbox(QWidget):
 
         self.con = sqlite3.connect('database.db')
         self.cur = self.con.cursor()
-        self.refresh()
         
+        self.set_self_types(1)
+
+        self.refresh()
+    
+    def set_self_types(self, type):
+        self.types_of_parts = type
+
     def refresh(self):
         while self.scrollLayout.itemAt(0) is not None:
             self.scrollLayout.itemAt(0).widget().update()
             self.scrollLayout.removeRow(0)
-        res = self.cur.execute("""SELECT * FROM Inbox WHERE type = '1'""")
+        res = self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.types_of_parts}'""")
         for el in res:
             self.scrollLayout.addRow(Part(el[0], el[1], el[2], el[3]))
-    
-    def remove_done(self):
-        for i in range(self.scrollLayout.rowCount()):
-            if self.scrollLayout.itemAt(i).widget().is_checked():
-                pass
     
     def mousePressEvent(self, event):
         self.refresh()
@@ -98,10 +102,53 @@ class Inbox(QWidget):
 
 
 class Today(QWidget):
-    def __init__(self):
+    def __init__(self, *args):
         super().__init__()
-        uic.loadUi('today_widget.ui', self)
 
+class Done(QWidget):
+    def __init__(self, *args):
+        super().__init__()
+        uic.loadUi('inbox_widget.ui', self)
+        self.add_btn.deleteLater()
+        self.refresh_btn.clicked.connect(self.refresh)
+        # scroll area widget contents - layout
+        self.scrollLayout = QFormLayout()
+
+        # scroll area widget contents
+        self.scrollWidget = QWidget()
+        self.scrollWidget.setLayout(self.scrollLayout)
+
+        # scroll area
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setWidget(self.scrollWidget)
+
+        self.con = sqlite3.connect('database.db')
+        self.cur = self.con.cursor()
+        
+        self.set_self_types(4)
+
+        self.refresh()
+    
+    def set_self_types(self, type):
+        self.types_of_parts = type
+
+    def refresh(self):
+        while self.scrollLayout.itemAt(0) is not None:
+            self.scrollLayout.itemAt(0).widget().update()
+            self.scrollLayout.removeRow(0)
+        res = self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.types_of_parts}'""")
+        for el in res:
+            self.scrollLayout.addRow(Part(el[0], el[1], el[2], el[3]))
+    
+    def mousePressEvent(self, event):
+        self.refresh()
+        print('inbox field clicked')
+    
+    def add_part(self):
+        part = Part()
+        self.scrollLayout.addRow(part)
+        part.text_edit_clicked()
+        
 
 class Part(QWidget):
     def __init__(self, id=None, text=None, desr=None, type=None):
@@ -173,7 +220,7 @@ class Part(QWidget):
             if self.id is not None and not self.will_delete:
                 self.con = sqlite3.connect('database.db')
                 self.cur = self.con.cursor()
-                self.cur.execute(f"""UPDATE Inbox SET text = '{self.lineEdit.text()}', description = '{self.textEdit.toPlainText()}', type='{self.type}' WHERE id = '{self.id}'""")
+                self.cur.execute(f"""UPDATE Inbox SET text = '{self.lineEdit.text()}', description = '{self.textEdit.toPlainText()}', type = '{self.type}' WHERE id = '{self.id}'""")
                 self.con.commit()
             else:
                 self.con = sqlite3.connect('database.db')
