@@ -41,10 +41,10 @@ class MainWindow(QMainWindow):
         self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
     
     def clear_highlights(self):
-        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251);")
-        self.today_btn.setStyleSheet("padding:5px;border:none; background-color: rgb(249, 250, 251);")
-        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251);")
-        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251);")
+        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
+        self.today_btn.setStyleSheet("padding:5px;border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
+        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
+        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
 
     def clearLayout(self, layout):
         while layout.count():
@@ -80,7 +80,7 @@ class Inbox(QWidget):
             self.scrollLayout.removeRow(0)
         res = self.cur.execute("""SELECT * FROM Inbox WHERE type = '1'""")
         for el in res:
-            self.scrollLayout.addRow(Part(el[0], el[1], el[2]))
+            self.scrollLayout.addRow(Part(el[0], el[1], el[2], el[3]))
     
     def remove_done(self):
         for i in range(self.scrollLayout.rowCount()):
@@ -104,11 +104,15 @@ class Today(QWidget):
 
 
 class Part(QWidget):
-    def __init__(self, id=None, text=None, desr=None):
+    def __init__(self, id=None, text=None, desr=None, type=None):
         super().__init__()
         self.id = id
         self.text = text
         self.desr = desr
+        self.type = type
+        if self.type is None:
+            self.type = 1
+        self.type_changed = False
 
         uic.loadUi('part.ui', self)
         self.lineEdit = cQLineEdit(self)
@@ -145,6 +149,10 @@ class Part(QWidget):
     def time_out(self):
         if self.checkBox.isChecked():
             self.is_showing = False
+            self.type = 4
+            self.type_changed = True
+            self.update()
+            self.type_changed = False
             print("Part hidden")
             self.hide()
 
@@ -161,18 +169,18 @@ class Part(QWidget):
             self.cur.execute(f"""DELETE FROM Inbox WHERE id = '{self.id}'""")
             self.con.commit()
         
-        elif self.text != self.lineEdit.text() or self.desr != self.textEdit.toPlainText():
+        elif self.text != self.lineEdit.text() or self.desr != self.textEdit.toPlainText() or self.type_changed:
             if self.id is not None and not self.will_delete:
                 self.con = sqlite3.connect('database.db')
                 self.cur = self.con.cursor()
-                self.cur.execute(f"""UPDATE Inbox SET text = '{self.lineEdit.text()}', description = '{self.textEdit.toPlainText()}' WHERE id = '{self.id}'""")
+                self.cur.execute(f"""UPDATE Inbox SET text = '{self.lineEdit.text()}', description = '{self.textEdit.toPlainText()}', type='{self.type}' WHERE id = '{self.id}'""")
                 self.con.commit()
             else:
                 self.con = sqlite3.connect('database.db')
                 self.cur = self.con.cursor()
                 self.lineEdit_text = self.lineEdit.text()
                 self.textEdit_text = self.textEdit.toPlainText()
-                self.cur.execute(f"""INSERT INTO Inbox(text, description, type) VALUES('{self.lineEdit_text}', '{self.textEdit_text}', '1')""")
+                self.cur.execute(f"""INSERT INTO Inbox(text, description, type) VALUES('{self.lineEdit_text}', '{self.textEdit_text}', '{self.type}')""")
                 self.con.commit()
 
     def is_checked(self):
