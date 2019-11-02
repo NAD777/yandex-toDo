@@ -1,10 +1,11 @@
 import sys
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QDate
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QVBoxLayout, QPushButton, QFormLayout, QVBoxLayout, QLineEdit
 from PyQt5.QtWidgets import QInputDialog, QMessageBox
 import csv
 import sqlite3
+from time import strftime, gmtime
 
 
 class MainWindow(QMainWindow):
@@ -56,8 +57,8 @@ class MainWindow(QMainWindow):
                 child.widget().deleteLater()
 
 
-class Inbox(QWidget):
-    def __init__(self, *args):
+class ListWidget(QWidget):
+    def __init__(self, database_type_of_parts=None):
         super().__init__()
         uic.loadUi('inbox_widget.ui', self)
         self.add_btn.clicked.connect(self.add_part)
@@ -76,21 +77,28 @@ class Inbox(QWidget):
         self.con = sqlite3.connect('database.db')
         self.cur = self.con.cursor()
         
-        self.set_self_types(1)
+        self.set_self_types(database_type_of_parts)
 
         self.refresh()
-    
+
     def set_self_types(self, type):
         self.types_of_parts = type
 
+    def get_type(self):
+        return self.types_of_parts
+        
     def refresh(self):
+        #function for refresh scrollWidget 
+        pass
+    
+    def clean_list(self):
         while self.scrollLayout.itemAt(0) is not None:
             self.scrollLayout.itemAt(0).widget().update()
             self.scrollLayout.removeRow(0)
-        res = self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.types_of_parts}'""")
-        for el in res:
-            self.scrollLayout.addRow(Part(el[0], el[1], el[2], el[3]))
     
+    def get_res(self, type):
+        return self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.get_type()}'""")
+
     def mousePressEvent(self, event):
         self.refresh()
         print('inbox field clicked')
@@ -101,78 +109,69 @@ class Inbox(QWidget):
         part.text_edit_clicked()
 
 
-class Today(QWidget):
+class Inbox(ListWidget):
     def __init__(self, *args):
-        super().__init__()
+        super().__init__(1)
+    
+    def refresh(self):
+        while self.scrollLayout.itemAt(0) is not None:
+            self.scrollLayout.itemAt(0).widget().update()
+            self.scrollLayout.removeRow(0)
+        self.clean_list()
+        res = self.get_res(self.get_type())
+        for el in res:
+            self.scrollLayout.addRow(Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4]))
 
-class Done(QWidget):
+
+class Today(ListWidget):
     def __init__(self, *args):
-        super().__init__()
-        uic.loadUi('inbox_widget.ui', self)
+        super().__init__(2)
+        
+
+class Done(ListWidget):
+    def __init__(self, *args):
+        super().__init__(4)
         self.add_btn.deleteLater()
-        self.refresh_btn.clicked.connect(self.refresh)
-        # scroll area widget contents - layout
-        self.scrollLayout = QFormLayout()
-
-        # scroll area widget contents
-        self.scrollWidget = QWidget()
-        self.scrollWidget.setLayout(self.scrollLayout)
-
-        # scroll area
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setWidget(self.scrollWidget)
-
-        self.con = sqlite3.connect('database.db')
-        self.cur = self.con.cursor()
-        
-        self.set_self_types(4)
-
-        self.refresh()
     
-    def set_self_types(self, type):
-        self.types_of_parts = type
-
     def refresh(self):
-        while self.scrollLayout.itemAt(0) is not None:
-            self.scrollLayout.itemAt(0).widget().update()
-            self.scrollLayout.removeRow(0)
-        res = self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.types_of_parts}'""")
+        self.clean_list()
+        res = self.get_res(self.get_type())
         for el in res:
-            self.scrollLayout.addRow(Part(el[0], el[1], el[2], el[3]))
-    
-    def mousePressEvent(self, event):
-        self.refresh()
-        print('inbox field clicked')
-    
-    def add_part(self):
-        part = Part()
-        self.scrollLayout.addRow(part)
-        part.text_edit_clicked()
-        
+            self.scrollLayout.addRow(Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4]))
+
 
 class Part(QWidget):
-    def __init__(self, id=None, text=None, desr=None, type=None):
+    def __init__(self, id=None, text=None, desr=None, type=None, date=None):
         super().__init__()
+        uic.loadUi('part.ui', self)
         self.id = id
         self.text = text
         self.desr = desr
         self.type = type
+        self.date = date
+        if self.date == 'None':
+            self.date = None
         if self.type is None:
             self.type = 1
-        self.type_changed = False
+        elif self.type == 4:
+            self.checkBox.toggle()
 
-        uic.loadUi('part.ui', self)
+        self.something_changed = False
+        
         self.lineEdit = cQLineEdit(self)
         self.lineEdit.setStyleSheet("padding:5px;")
         self.lineEdit.clicked.connect(self.text_edit_clicked)
 
+        self.calendarWidget.hide()
+
         self.gridLayout.addWidget(self.lineEdit, 0, 1)
         self.setLayout(self.gridLayout)
         self.lineEdit.setReadOnly(True)
-        self.textEdit.hide()
-        
-        self.delete_btn.hide()
+
         self.delete_btn.clicked.connect(self.delete)
+        self.calendar_btn.clicked.connect(self.show_calendar)
+
+        self.set_date_btn.clicked.connect(self.set_date)
 
         if self.text is not None:
             self.text = str(self.text)
@@ -188,6 +187,36 @@ class Part(QWidget):
 
         self.is_showing = True
 
+        self.calendar_is_showing = False
+
+        self.hide_adds() 
+    
+    def show_calendar(self):
+        if self.calendar_is_showing:
+            self.calendarWidget.hide()
+            self.set_date_btn.hide()
+            self.clear_date_btn.hide()
+            self.calendar_is_showing = False
+        else:
+            self.calendarWidget.setMinimumDate(QDate(*map(int, strftime("%Y-%m-%d", gmtime()).split('-'))))
+            if self.date is not None:
+                self.calendarWidget.setSelectedDate(QDate(*map(int, self.date.split('-'))))
+            else:
+                self.calendarWidget.setSelectedDate(QDate(*map(int, strftime("%Y-%m-%d", gmtime()).split('-'))))
+            self.calendarWidget.show()
+            self.set_date_btn.show()
+            self.clear_date_btn.show()
+            self.calendar_is_showing = True
+
+    def set_date(self):
+        if self.type != 3:
+            self.hide()
+        selected_date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
+        print(selected_date)
+        self.something_changed = True
+        self.type = 3
+        self.date = selected_date
+
     def to_done(self):
         self.timer = QTimer()
         self.timer.timeout.connect(self.time_out)
@@ -197,12 +226,23 @@ class Part(QWidget):
         if self.checkBox.isChecked():
             self.is_showing = False
             self.type = 4
-            self.type_changed = True
+            self.something_changed = True
             self.update()
-            self.type_changed = False
+            self.something_changed = False
             print("Part hidden")
             self.hide()
+        elif self.type == 4:
+            self.is_showing = False
+            if self.date is None:
+                self.type = 1
+            else:
+                self.type = 3
+            self.something_changed = True
+            self.update()
+            self.something_changed = False
+            self.hide()
 
+            
     def delete(self):
         reply = QMessageBox.question(self, '', "Удалить?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
@@ -216,18 +256,19 @@ class Part(QWidget):
             self.cur.execute(f"""DELETE FROM Inbox WHERE id = '{self.id}'""")
             self.con.commit()
         
-        elif self.text != self.lineEdit.text() or self.desr != self.textEdit.toPlainText() or self.type_changed:
+        elif self.text != self.lineEdit.text() or self.desr != self.textEdit.toPlainText() or self.something_changed:
             if self.id is not None and not self.will_delete:
                 self.con = sqlite3.connect('database.db')
                 self.cur = self.con.cursor()
-                self.cur.execute(f"""UPDATE Inbox SET text = '{self.lineEdit.text()}', description = '{self.textEdit.toPlainText()}', type = '{self.type}' WHERE id = '{self.id}'""")
+                print(self.date)
+                self.cur.execute(f"""UPDATE Inbox SET text = '{self.lineEdit.text()}', description = '{self.textEdit.toPlainText()}', type = '{self.type}', date = '{self.date}' WHERE id = '{self.id}'""")
                 self.con.commit()
             else:
                 self.con = sqlite3.connect('database.db')
                 self.cur = self.con.cursor()
                 self.lineEdit_text = self.lineEdit.text()
                 self.textEdit_text = self.textEdit.toPlainText()
-                self.cur.execute(f"""INSERT INTO Inbox(text, description, type) VALUES('{self.lineEdit_text}', '{self.textEdit_text}', '{self.type}')""")
+                self.cur.execute(f"""INSERT INTO Inbox(text, description, type, date) VALUES('{self.lineEdit_text}', '{self.textEdit_text}', '{self.type}', '{self.date}')""")
                 self.con.commit()
 
     def is_checked(self):
@@ -239,6 +280,7 @@ class Part(QWidget):
         if self.is_showing: 
             self.textEdit.show()
             self.delete_btn.show()
+            self.calendar_btn.show()
             self.lineEdit.setReadOnly(False)
             self.lineEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
             self.textEdit.setStyleSheet("background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
@@ -247,6 +289,10 @@ class Part(QWidget):
         self.lineEdit.setReadOnly(True)
         self.lineEdit.setStyleSheet("background-color: rgb(249, 250, 251); padding:5px;border-radius: 8px;")
         self.textEdit.hide()
+        self.calendar_btn.hide()
+        self.calendarWidget.hide()
+        self.set_date_btn.hide()
+        self.clear_date_btn.hide()
         self.delete_btn.hide()
 
     def mousePressEvent(self, event):
@@ -254,9 +300,6 @@ class Part(QWidget):
     
     def mouseDoubleClickEvent(self, event):   
         print('2 click!')
-        self.textEdit.show()
-        self.lineEdit.setReadOnly(False)
-        self.gridLayout.addWidget(QPushButton())
 
 
 class cQLineEdit(QLineEdit):
