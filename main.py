@@ -125,7 +125,20 @@ class Inbox(ListWidget):
 
 class Today(ListWidget):
     def __init__(self, *args):
-        super().__init__(2)
+        super().__init__(3)
+    
+    def get_today_date(self):
+        return strftime("%Y-%m-%d", gmtime())
+
+    def get_res(self, type):
+        print(self.get_today_date())
+        return self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.get_type()}' AND date = '{self.get_today_date()}'""")
+
+    def refresh(self):
+        self.clean_list()
+        res = self.get_res(self.get_type())
+        for el in res:
+            self.scrollLayout.addRow(Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4]))
         
 
 class Done(ListWidget):
@@ -172,6 +185,7 @@ class Part(QWidget):
         self.calendar_btn.clicked.connect(self.show_calendar)
 
         self.set_date_btn.clicked.connect(self.set_date)
+        self.clear_date_btn.clicked.connect(self.clear_date)
 
         if self.text is not None:
             self.text = str(self.text)
@@ -191,6 +205,9 @@ class Part(QWidget):
 
         self.hide_adds() 
     
+    def get_today_date(self):
+        return strftime("%Y-%m-%d", gmtime())
+
     def show_calendar(self):
         if self.calendar_is_showing:
             self.calendarWidget.hide()
@@ -198,24 +215,32 @@ class Part(QWidget):
             self.clear_date_btn.hide()
             self.calendar_is_showing = False
         else:
-            self.calendarWidget.setMinimumDate(QDate(*map(int, strftime("%Y-%m-%d", gmtime()).split('-'))))
+            self.calendarWidget.setMinimumDate(QDate(*map(int, self.get_today_date().split('-'))))
             if self.date is not None:
                 self.calendarWidget.setSelectedDate(QDate(*map(int, self.date.split('-'))))
             else:
-                self.calendarWidget.setSelectedDate(QDate(*map(int, strftime("%Y-%m-%d", gmtime()).split('-'))))
+                self.calendarWidget.setSelectedDate(QDate(*map(int, self.get_today_date().split('-'))))
             self.calendarWidget.show()
             self.set_date_btn.show()
             self.clear_date_btn.show()
             self.calendar_is_showing = True
 
     def set_date(self):
-        if self.type != 3:
-            self.hide()
         selected_date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
-        print(selected_date)
+        if selected_date != self.date:
+            self.hide()
+            print(selected_date)
+            self.something_changed = True
+            self.type = 3
+            self.date = selected_date
+            self.update()
+    
+    def clear_date(self):
+        self.type = 1
+        self.date = None
         self.something_changed = True
-        self.type = 3
-        self.date = selected_date
+        self.show_calendar()
+        self.update()
 
     def to_done(self):
         self.timer = QTimer()
@@ -236,13 +261,17 @@ class Part(QWidget):
             if self.date is None:
                 self.type = 1
             else:
-                self.type = 3
+                today = self.get_today_date()
+                if self.date < today:
+                    self.date = None
+                    self.type = 1
+                else:
+                    self.type = 3
             self.something_changed = True
             self.update()
             self.something_changed = False
             self.hide()
 
-            
     def delete(self):
         reply = QMessageBox.question(self, '', "Удалить?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
