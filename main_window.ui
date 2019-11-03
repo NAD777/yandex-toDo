@@ -74,10 +74,15 @@
       <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
 padding:5px;
-border-radius: 8px;</string>
+border-radius: 8px;
+text-align: left;</string>
      </property>
      <property name="text">
       <string>Сегодня </string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>icons/star1.png</normaloff>icons/star1.png</iconset>
      </property>
     </widget>
     <widget class="QPushButton" name="logbook_btn">
@@ -93,10 +98,15 @@ border-radius: 8px;</string>
       <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
 padding:5px;
-border-radius: 8px;</string>
+border-radius: 8px;
+text-align: left;</string>
      </property>
      <property name="text">
       <string>Журнал</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../yandex-toDo/icons/wedding-planning.png</normaloff>../../yandex-toDo/icons/wedding-planning.png</iconset>
      </property>
     </widget>
     <widget class="QPushButton" name="inbox_btn">
@@ -112,7 +122,8 @@ border-radius: 8px;</string>
       <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
 padding:5px;
-border-radius: 8px;</string>
+border-radius: 8px;
+text-align: left;</string>
      </property>
      <property name="text">
       <string>Входящие</string>
@@ -135,10 +146,15 @@ border-radius: 8px;</string>
       <string notr="true">background-color: rgb(249, 250, 251);
 border:none;
 padding:5px;
-border-radius: 8px;</string>
+border-radius: 8px;
+text-align: left;</string>
      </property>
      <property name="text">
       <string>Планы</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>icons/calendr.png</normaloff>icons/calendr.png</iconset>
      </property>
     </widget>
    </widget>

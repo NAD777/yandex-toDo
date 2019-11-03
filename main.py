@@ -20,33 +20,33 @@ class MainWindow(QMainWindow):
     
     def open_inbox(self):
         self.clear_highlights()
-        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
+        self.inbox_btn.setStyleSheet("text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
         self.verticalLayout.addWidget(Inbox())
 
     def open_today(self):
         self.clear_highlights()
-        self.today_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
+        self.today_btn.setStyleSheet("text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
         self.verticalLayout.addWidget(Today())
     
     def open_plans(self):
         self.clear_highlights()
-        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
+        self.plans_btn.setStyleSheet("text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
         self.verticalLayout.addWidget(Plans())
     
     def open_logbook(self):
         self.clear_highlights()
-        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
+        self.logbook_btn.setStyleSheet("text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
         self.verticalLayout.addWidget(Done())
     
     def clear_highlights(self):
-        self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
-        self.today_btn.setStyleSheet("padding:5px;border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
-        self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
-        self.logbook_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
+        self.inbox_btn.setStyleSheet("text-align: left; padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
+        self.today_btn.setStyleSheet("text-align: left; padding:5px;border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
+        self.plans_btn.setStyleSheet("text-align: left; padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
+        self.logbook_btn.setStyleSheet("text-align: left; padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px;")
 
     def clearLayout(self, layout):
         while layout.count():
@@ -104,6 +104,7 @@ class ListWidget(QWidget):
     
     def add_part(self):
         part = Part()
+        part.delete_btn.clicked.connect(self.refresh)
         self.scrollLayout.addRow(part)
         part.text_edit_clicked()
     
@@ -117,7 +118,6 @@ class Inbox(ListWidget):
     def move_to_inbox_what_was_missed(self):
         cur = self.get_today_date()
         res = self.cur.execute(f"""SELECT id FROM Inbox WHERE date < '{cur}' AND type = '3'""").fetchall()
-        print(res)
         for _id in res:
             self.cur.execute(f"""UPDATE Inbox SET type = '1', date = 'None' WHERE id = '{_id[0]}'""")
         self.con.commit()
@@ -151,6 +151,7 @@ class Today(ListWidget):
     def add_part(self):
         part = Part(type=3, date=self.get_today_date())
         part.something_changed = True
+        part.delete_btn.clicked.connect(self.refresh)
         part.clear_date_btn.clicked.connect(self.refresh)
         self.scrollLayout.addRow(part)
         part.text_edit_clicked()
