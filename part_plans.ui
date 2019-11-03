@@ -27,7 +27,7 @@
      <widget class="QLabel" name="label">
       <property name="styleSheet">
        <string notr="true">padding: 3px;
-border: 2px solid #808080;
+border: 2px solid #828282;
 border-bottom-color: rgb(249, 250, 251);
 border-right-color: rgb(249, 250, 251);
 border-left-color: rgb(249, 250, 251);</string>
