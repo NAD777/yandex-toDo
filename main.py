@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         self.clear_highlights()
         self.plans_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
-        self.verticalLayout.addWidget(Part())
+        self.verticalLayout.addWidget(Plans())
     
     def open_logbook(self):
         self.clear_highlights()
@@ -84,6 +84,9 @@ class ListWidget(QWidget):
     def set_self_types(self, type):
         self.types_of_parts = type
 
+    def get_today_date(self):
+        return strftime("%Y-%m-%d", gmtime())
+
     def get_type(self):
         return self.types_of_parts
         
@@ -114,9 +117,6 @@ class Inbox(ListWidget):
         super().__init__(1)
     
     def refresh(self):
-        while self.scrollLayout.itemAt(0) is not None:
-            self.scrollLayout.itemAt(0).widget().update()
-            self.scrollLayout.removeRow(0)
         self.clean_list()
         res = self.get_res(self.get_type())
         for el in res:
@@ -128,16 +128,12 @@ class Inbox(ListWidget):
 class Today(ListWidget):
     def __init__(self, *args):
         super().__init__(3)
-    
-    def get_today_date(self):
-        return strftime("%Y-%m-%d", gmtime())
 
     def get_res(self, type):
         print(self.get_today_date())
         return self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.get_type()}' AND date = '{self.get_today_date()}'""")
 
     def refresh(self):
-        print(123)
         self.clean_list()
         res = self.get_res(self.get_type())
         for el in res:
@@ -152,6 +148,52 @@ class Today(ListWidget):
         self.scrollLayout.addRow(part)
         part.text_edit_clicked()
         
+
+class Plans(ListWidget):
+    def __init__(self, *args):
+        super().__init__(3)
+        self.refresh()
+        
+    def get_res(self, begin, type):
+        return self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{type}' AND date >= '{begin}'""").fetchall()
+
+    def refresh(self):
+        print("refresh")
+        self.clean_list()
+        res = sorted(self.get_res(self.get_today_date(), self.get_type()), key=lambda x: x[4])
+        self.num_month_name = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"]
+        prev_date = None
+        for el in res:
+            date_of_el = el[4]
+            if prev_date != date_of_el:
+                year, mon, day = date_of_el.split('-')
+                mon = int(mon) - 1
+                mon_name = self.num_month_name[mon]
+                beautiful_date = f"<b>{day}</b> {mon_name} {year}"
+                self.scrollLayout.addRow(Plans_part(beautiful_date))
+            
+            part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4])
+
+            part.clear_date_btn.clicked.connect(self.refresh)
+            part.set_date_btn.clicked.connect(self.refresh)
+
+            self.scrollLayout.addRow(Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4]))
+            prev_date = date_of_el
+
+    def add_part(self):
+        part = Part(type=self.get_type(), date=self.get_today_date())
+        part.update()
+        self.refresh()
+        part.text_edit_clicked()
+
+
+class Plans_part(QWidget):
+    def __init__(self, text):
+        super().__init__()
+        uic.loadUi('part_plans.ui', self)
+        self.label.setText(text)
+        self.setLayout(self.verticalLayout_2)
+
 
 class Done(ListWidget):
     def __init__(self, *args):
