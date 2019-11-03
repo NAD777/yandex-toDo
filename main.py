@@ -23,14 +23,12 @@ class MainWindow(QMainWindow):
         self.inbox_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
         self.verticalLayout.addWidget(Inbox())
-        # self.content.setWidget(Example())
 
     def open_today(self):
         self.clear_highlights()
         self.today_btn.setStyleSheet("padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px;")
         self.clearLayout(self.verticalLayout)
         self.verticalLayout.addWidget(Today())
-        # self.content.setWidget(Example())
     
     def open_plans(self):
         self.clear_highlights()
@@ -79,8 +77,6 @@ class ListWidget(QWidget):
         
         self.set_self_types(database_type_of_parts)
 
-        self.refresh()
-
     def set_self_types(self, type):
         self.types_of_parts = type
 
@@ -115,7 +111,17 @@ class ListWidget(QWidget):
 class Inbox(ListWidget):
     def __init__(self, *args):
         super().__init__(1)
+        self.move_to_inbox_what_was_missed()
+        self.refresh()
     
+    def move_to_inbox_what_was_missed(self):
+        cur = self.get_today_date()
+        res = self.cur.execute(f"""SELECT id FROM Inbox WHERE date < '{cur}' AND type = '3'""").fetchall()
+        print(res)
+        for _id in res:
+            self.cur.execute(f"""UPDATE Inbox SET type = '1', date = 'None' WHERE id = '{_id[0]}'""")
+        self.con.commit()
+
     def refresh(self):
         self.clean_list()
         res = self.get_res(self.get_type())
@@ -128,6 +134,7 @@ class Inbox(ListWidget):
 class Today(ListWidget):
     def __init__(self, *args):
         super().__init__(3)
+        self.refresh()
 
     def get_res(self, type):
         print(self.get_today_date())
@@ -152,6 +159,7 @@ class Today(ListWidget):
 class Plans(ListWidget):
     def __init__(self, *args):
         super().__init__(3)
+        self.refresh()
         
     def get_res(self, begin, type):
         return self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{type}' AND date >= '{begin}'""").fetchall()
@@ -198,6 +206,7 @@ class Done(ListWidget):
     def __init__(self, *args):
         super().__init__(4)
         self.add_btn.deleteLater()
+        self.refresh()
     
     def refresh(self):
         self.clean_list()
