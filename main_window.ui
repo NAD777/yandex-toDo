@@ -75,7 +75,8 @@
 border:none;
 padding:5px;
 border-radius: 8px;
-text-align: left;</string>
+text-align: left;
+margin-left: 3px;</string>
      </property>
      <property name="text">
       <string>Сегодня </string>
@@ -99,7 +100,8 @@ text-align: left;</string>
 border:none;
 padding:5px;
 border-radius: 8px;
-text-align: left;</string>
+text-align: left;
+margin-left: 3px;</string>
      </property>
      <property name="text">
       <string>Журнал</string>
@@ -123,7 +125,8 @@ text-align: left;</string>
 border:none;
 padding:5px;
 border-radius: 8px;
-text-align: left;</string>
+text-align: left;
+margin-left: 3px;</string>
      </property>
      <property name="text">
       <string>Входящие</string>
@@ -147,7 +150,8 @@ text-align: left;</string>
 border:none;
 padding:5px;
 border-radius: 8px;
-text-align: left;</string>
+text-align: left;
+margin-left: 3px;</string>
      </property>
      <property name="text">
       <string>Планы</string>
