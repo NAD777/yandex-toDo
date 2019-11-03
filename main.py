@@ -152,7 +152,6 @@ class Today(ListWidget):
 class Plans(ListWidget):
     def __init__(self, *args):
         super().__init__(3)
-        self.refresh()
         
     def get_res(self, begin, type):
         return self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{type}' AND date >= '{begin}'""").fetchall()
