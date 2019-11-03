@@ -88,7 +88,7 @@ class ListWidget(QWidget):
         return self.types_of_parts
         
     def refresh(self):
-        #function for refresh scrollWidget 
+        # function for refresh scrollWidget 
         pass
     
     def clean_list(self):
@@ -107,7 +107,7 @@ class ListWidget(QWidget):
         part = Part()
         self.scrollLayout.addRow(part)
         part.text_edit_clicked()
-
+    
 
 class Inbox(ListWidget):
     def __init__(self, *args):
@@ -120,7 +120,9 @@ class Inbox(ListWidget):
         self.clean_list()
         res = self.get_res(self.get_type())
         for el in res:
-            self.scrollLayout.addRow(Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4]))
+            part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4])
+            part.clear_date_btn.clicked.connect(self.refresh)
+            self.scrollLayout.addRow(part)
 
 
 class Today(ListWidget):
@@ -135,10 +137,20 @@ class Today(ListWidget):
         return self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.get_type()}' AND date = '{self.get_today_date()}'""")
 
     def refresh(self):
+        print(123)
         self.clean_list()
         res = self.get_res(self.get_type())
         for el in res:
-            self.scrollLayout.addRow(Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4]))
+            part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4])
+            part.clear_date_btn.clicked.connect(self.refresh)
+            self.scrollLayout.addRow(part)
+    
+    def add_part(self):
+        part = Part(type=3, date=self.get_today_date())
+        part.something_changed = True
+        part.clear_date_btn.clicked.connect(self.refresh)
+        self.scrollLayout.addRow(part)
+        part.text_edit_clicked()
         
 
 class Done(ListWidget):
@@ -228,15 +240,19 @@ class Part(QWidget):
     def set_date(self):
         selected_date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
         if selected_date != self.date:
-            self.hide()
-            print(selected_date)
+            print(selected_date, 1)
             self.something_changed = True
-            self.type = 3
+            if self.type != 4:
+                self.hide()
+                self.type = 3
+            else:
+                self.show_calendar()
             self.date = selected_date
             self.update()
     
     def clear_date(self):
-        self.type = 1
+        if self.type != 4:
+            self.type = 1
         self.date = None
         self.something_changed = True
         self.show_calendar()
@@ -289,7 +305,6 @@ class Part(QWidget):
             if self.id is not None and not self.will_delete:
                 self.con = sqlite3.connect('database.db')
                 self.cur = self.con.cursor()
-                print(self.date)
                 self.cur.execute(f"""UPDATE Inbox SET text = '{self.lineEdit.text()}', description = '{self.textEdit.toPlainText()}', type = '{self.type}', date = '{self.date}' WHERE id = '{self.id}'""")
                 self.con.commit()
             else:
