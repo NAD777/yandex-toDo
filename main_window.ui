@@ -108,7 +108,7 @@ padding-left:10px;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>../../yandex-toDo/icons/wedding-planning.png</normaloff>../../yandex-toDo/icons/wedding-planning.png</iconset>
+       <normaloff>icons/wedding-planning.png</normaloff>icons/wedding-planning.png</iconset>
      </property>
     </widget>
     <widget class="QPushButton" name="inbox_btn">

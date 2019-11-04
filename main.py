@@ -2,8 +2,8 @@ import sys
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QDate
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QVBoxLayout, \
-    QPushButton, QFormLayout, QVBoxLayout, QLineEdit
-from PyQt5.QtWidgets import QInputDialog, QMessageBox
+    QPushButton, QFormLayout, QVBoxLayout, QLineEdit, QDialog
+from PyQt5.QtWidgets import QMessageBox
 import csv
 import sqlite3
 from time import strftime, gmtime
@@ -13,6 +13,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('main_window.ui', self)
+        self.setWindowTitle("ToDo")
         self.inbox_btn.clicked.connect(self.open_inbox)
         self.today_btn.clicked.connect(self.open_today)
         self.plans_btn.clicked.connect(self.open_plans)
@@ -354,9 +355,11 @@ class Part(QWidget):
             self.hide()
 
     def delete(self):
-        reply = QMessageBox.question(self, '', "Удалить?", QMessageBox.Yes | QMessageBox.No,
-                                     QMessageBox.No)
-        if reply == QMessageBox.Yes:
+        quest = Question("Удалить задачу?")
+        quest.show()
+        quest.exec()
+        print(quest.result())
+        if quest.result():
             self.hide()
             self.will_delete = True
 
@@ -419,6 +422,22 @@ class Part(QWidget):
     def mouseDoubleClickEvent(self, event):
         print('2 click!')
 
+
+class Question(QDialog):
+    def __init__(self, text):
+        super().__init__()
+        uic.loadUi("question.ui", self)
+        self.label.setText(text)
+        self.setWindowTitle("Внимание")
+        self.accept_btn.clicked.connect(self.accept_method)
+        self.reject_btn.clicked.connect(self.reject_method)
+    
+    def accept_method(self):
+        self.accept()
+
+    def reject_method(self):
+        self.reject()
+    
 
 class cQLineEdit(QLineEdit):
     clicked = pyqtSignal()
