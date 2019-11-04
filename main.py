@@ -1,10 +1,8 @@
 import sys
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QDate
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QWidget, QVBoxLayout, \
-    QPushButton, QFormLayout, QVBoxLayout, QLineEdit, QDialog
-from PyQt5.QtWidgets import QMessageBox
-import csv
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, \
+    QFormLayout, QLineEdit, QDialog
 import sqlite3
 from time import strftime, gmtime
 
@@ -49,6 +47,7 @@ class MainWindow(QMainWindow):
         self.verticalLayout.addWidget(Done())
 
     def clear_highlights(self):
+        # functions for clear highlights on main menu buttons
         self.inbox_btn.setStyleSheet(
             "text-align: left; padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px; padding-left:10px;")
         self.today_btn.setStyleSheet(
@@ -109,14 +108,21 @@ class ListWidget(QWidget):
         return self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.get_type()}'""")
 
     def mousePressEvent(self, event):
+        # when we click on an empty space the window is updated 
         self.refresh()
-        print('inbox field clicked')
 
     def add_part(self):
         part = Part()
         part.delete_btn.clicked.connect(self.refresh)
         self.scrollLayout.addRow(part)
         part.text_edit_clicked()
+
+
+""""
+1 type - inbox
+3 type - tasks that have a due date
+4 type - completed tasks
+"""
 
 
 class Inbox(ListWidget):
@@ -148,7 +154,6 @@ class Today(ListWidget):
         self.refresh()
 
     def get_res(self, type):
-        print(self.get_today_date())
         return self.cur.execute(
             f"""SELECT * FROM Inbox WHERE type = '{self.get_type()}' AND date = '{self.get_today_date()}'""")
 
@@ -179,7 +184,6 @@ class Plans(ListWidget):
             f"""SELECT * FROM Inbox WHERE type = '{type}' AND date >= '{begin}'""").fetchall()
 
     def refresh(self):
-        print("refresh")
         self.clean_list()
         res = sorted(self.get_res(self.get_today_date(), self.get_type()), key=lambda x: x[4])
         self.num_month_name = ["Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", "Июля",
@@ -306,7 +310,6 @@ class Part(QWidget):
     def set_date(self):
         selected_date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
         if selected_date != self.date:
-            print(selected_date, 1)
             self.something_changed = True
             if self.type != 4:
                 self.hide()
@@ -336,7 +339,6 @@ class Part(QWidget):
             self.something_changed = True
             self.update()
             self.something_changed = False
-            print("Part hidden")
             self.hide()
         elif self.type == 4:
             self.is_showing = False
@@ -358,7 +360,6 @@ class Part(QWidget):
         quest = Question("Удалить задачу?")
         quest.show()
         quest.exec()
-        print(quest.result())
         if quest.result():
             self.hide()
             self.will_delete = True
@@ -416,12 +417,6 @@ class Part(QWidget):
         self.clear_date_btn.hide()
         self.delete_btn.hide()
 
-    def mousePressEvent(self, event):
-        print('1 click')
-
-    def mouseDoubleClickEvent(self, event):
-        print('2 click!')
-
 
 class Question(QDialog):
     def __init__(self, text):
@@ -447,7 +442,6 @@ class cQLineEdit(QLineEdit):
         self.setPlaceholderText('Новая задача')
 
     def mousePressEvent(self, QMouseEvent):
-        print(self.text())
         self.clicked.emit()
 
 
