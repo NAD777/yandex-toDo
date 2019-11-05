@@ -31,37 +31,76 @@ class MainWindow(QMainWindow):
     def open_inbox(self):
         self.clear_highlights()
         self.inbox_btn.setStyleSheet(
-            "text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px; padding-left:10px;")
+            """text-align: left; 
+            padding:5px; 
+            border:none; 
+            background-color: rgb(225, 227, 232); 
+            border-radius: 8px; padding-left:10px;""")
         self.open(Inbox())
 
     def open_today(self):
         self.clear_highlights()
         self.today_btn.setStyleSheet(
-            "text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px; padding-left:10px;")
+            """text-align: left; 
+            padding:5px; 
+            border:none; 
+            background-color: rgb(225, 227, 232); 
+            border-radius: 8px; 
+            padding-left:10px;""")
         self.open(Today())
 
     def open_plans(self):
         self.clear_highlights()
         self.plans_btn.setStyleSheet(
-            "text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px; padding-left:10px;")
+            """text-align: left; 
+            padding:5px; 
+            border:none; 
+            background-color: rgb(225, 227, 232); 
+            border-radius: 8px; 
+            padding-left:10px;""")
         self.open(Plans())
 
     def open_logbook(self):
         self.clear_highlights()
         self.logbook_btn.setStyleSheet(
-            "text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px; padding-left:10px;")
+            """text-align: left; 
+            padding:5px; 
+            border:none; 
+            background-color: rgb(225, 227, 232); 
+            border-radius: 8px; 
+            padding-left:10px;""")
         self.open(Done())
 
     def clear_highlights(self):
         '''Functions for clear highlights on main menu buttons'''
         self.inbox_btn.setStyleSheet(
-            "text-align: left; padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px; padding-left:10px;")
+            """text-align: left; 
+            padding:5px; 
+            border:none; 
+            background-color: rgb(249, 250, 251); 
+            border-radius: 8px; 
+            padding-left:10px;""")
         self.today_btn.setStyleSheet(
-            "text-align: left; padding:5px;border:none; background-color: rgb(249, 250, 251); border-radius: 8px; padding-left:10px;")
+            """text-align: left; 
+            padding:5px;
+            border:none; 
+            background-color: rgb(249, 250, 251); 
+            border-radius: 8px; 
+            padding-left:10px;""")
         self.plans_btn.setStyleSheet(
-            "text-align: left; padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px; padding-left:10px;")
+            """text-align: left; 
+            padding:5px; 
+            border:none; 
+            background-color: rgb(249, 250, 251); 
+            border-radius: 8px; 
+            padding-left:10px;""")
         self.logbook_btn.setStyleSheet(
-            "text-align: left; padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px; padding-left:10px;")
+            """text-align: left; 
+            padding:5px; 
+            border:none; 
+            background-color: rgb(249, 250, 251); 
+            border-radius: 8px; 
+            padding-left:10px;""")
 
     def clearLayout(self, layout):
         while layout.count():
@@ -409,14 +448,17 @@ class Part(QWidget):
             self.calendar_btn.show()
             self.lineEdit.setReadOnly(False)
             self.lineEdit.setStyleSheet(
-                "background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
+                """background-color: rgb(213, 224, 252); 
+                padding:5px;border-radius: 8px;""")
             self.textEdit.setStyleSheet(
-                "background-color: rgb(213, 224, 252); padding:5px;border-radius: 8px;")
+                """background-color: rgb(213, 224, 252); 
+                padding:5px;border-radius: 8px;""")
 
     def hide_adds(self):
         self.lineEdit.setReadOnly(True)
         self.lineEdit.setStyleSheet(
-            "background-color: rgb(249, 250, 251); padding:5px;border-radius: 8px;")
+            """background-color: rgb(249, 250, 251); 
+            padding:5px;border-radius: 8px;""")
         self.textEdit.hide()
         self.calendar_btn.hide()
         self.calendarWidget.hide()
