@@ -144,7 +144,7 @@ class Inbox(ListWidget):
         res = self.get_res(self.get_type())
         for el in res:
             part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4])
-            part.clear_date_btn.clicked.connect(self.refresh)
+            part.delete_btn.clicked.connect(self.refresh)
             self.scrollLayout.addRow(part)
 
 
@@ -202,8 +202,9 @@ class Plans(ListWidget):
 
             part.clear_date_btn.clicked.connect(self.refresh)
             part.set_date_btn.clicked.connect(self.refresh)
+            part.delete_btn.clicked.connect(self.refresh)
 
-            self.scrollLayout.addRow(Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4]))
+            self.scrollLayout.addRow(part)
             prev_date = date_of_el
 
     def add_part(self):
