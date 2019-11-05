@@ -16,35 +16,41 @@ class MainWindow(QMainWindow):
         self.today_btn.clicked.connect(self.open_today)
         self.plans_btn.clicked.connect(self.open_plans)
         self.logbook_btn.clicked.connect(self.open_logbook)
+
+        self.cur_layout = None
+        
         self.open_inbox()
+
+    def open(self, cls):
+        if self.cur_layout is not None:
+            self.cur_layout.clean_list()
+        self.cur_layout = cls
+        self.clearLayout(self.verticalLayout)
+        self.verticalLayout.addWidget(self.cur_layout)
 
     def open_inbox(self):
         self.clear_highlights()
         self.inbox_btn.setStyleSheet(
             "text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px; padding-left:10px;")
-        self.clearLayout(self.verticalLayout)
-        self.verticalLayout.addWidget(Inbox())
+        self.open(Inbox())
 
     def open_today(self):
         self.clear_highlights()
         self.today_btn.setStyleSheet(
             "text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px; padding-left:10px;")
-        self.clearLayout(self.verticalLayout)
-        self.verticalLayout.addWidget(Today())
+        self.open(Today())
 
     def open_plans(self):
         self.clear_highlights()
         self.plans_btn.setStyleSheet(
             "text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px; padding-left:10px;")
-        self.clearLayout(self.verticalLayout)
-        self.verticalLayout.addWidget(Plans())
+        self.open(Plans())
 
     def open_logbook(self):
         self.clear_highlights()
         self.logbook_btn.setStyleSheet(
             "text-align: left; padding:5px; border:none; background-color: rgb(225, 227, 232); border-radius: 8px; padding-left:10px;")
-        self.clearLayout(self.verticalLayout)
-        self.verticalLayout.addWidget(Done())
+        self.open(Done())
 
     def clear_highlights(self):
         # functions for clear highlights on main menu buttons
@@ -67,9 +73,8 @@ class MainWindow(QMainWindow):
 class ListWidget(QWidget):
     def __init__(self, database_type_of_parts=None):
         super().__init__()
-        uic.loadUi('inbox_widget.ui', self)
+        uic.loadUi('content_widget.ui', self)
         self.add_btn.clicked.connect(self.add_part)
-        self.refresh_btn.clicked.connect(self.refresh)
         # scroll area widget contents - layout
         self.scrollLayout = QFormLayout()
 
@@ -221,7 +226,7 @@ class Done(ListWidget):
         self.clean_list()
         res = self.get_res(self.get_type())
         for el in res:
-            self.scrollLayout.addRow(Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4]))
+            self.scrollLayout.addRow(Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4], parent=self))
 
 
 class Part(QWidget):
@@ -279,6 +284,8 @@ class Part(QWidget):
 
         self.hide_adds()
 
+        self.is_delete_dialog_open = False
+
     def get_today_date(self):
         return strftime("%Y-%m-%d", gmtime())
 
@@ -287,7 +294,6 @@ class Part(QWidget):
             self.calendarWidget.hide()
             self.set_date_btn.hide()
             self.clear_date_btn.hide()
-            self.calendar_is_showing = False
         else:
             self.calendarWidget.setMinimumDate(QDate(*map(int, self.get_today_date().split('-'))))
             if self.date is not None:
@@ -298,7 +304,7 @@ class Part(QWidget):
             self.calendarWidget.show()
             self.set_date_btn.show()
             self.clear_date_btn.show()
-            self.calendar_is_showing = True
+        self.calendar_is_showing = not self.calendar_is_showing
 
     def set_date(self):
         selected_date = self.calendarWidget.selectedDate().toString("yyyy-MM-dd")
@@ -306,11 +312,13 @@ class Part(QWidget):
             self.something_changed = True
             if self.type != 4:
                 self.type = 3
+                self.date = selected_date
+                self.update()
                 self.parent.refresh()
             else:
                 self.show_calendar()
-            self.date = selected_date
-            self.update()
+                self.date = selected_date
+                self.update()
 
     def clear_date(self):
         if self.type != 4:
@@ -327,14 +335,10 @@ class Part(QWidget):
 
     def time_out(self):
         if self.checkBox.isChecked():
-            self.is_showing = False
             self.type = 4
             self.something_changed = True
             self.update()
-            self.something_changed = False
-            self.parent.refresh()
         elif self.type == 4:
-            self.is_showing = False
             if self.date is None:
                 self.type = 1
             else:
@@ -346,16 +350,18 @@ class Part(QWidget):
                     self.type = 3
             self.something_changed = True
             self.update()
-            self.something_changed = False
-            self.parent.refresh()
+        self.parent.refresh()
 
     def delete(self):
-        quest = Question("Удалить задачу?")
-        quest.show()
-        quest.exec()
-        if quest.result():
-            self.will_delete = True
-            self.parent.refresh()
+        if not self.is_delete_dialog_open:
+            self.is_delete_dialog_open = True
+            quest = Question("Удалить задачу?")
+            quest.show()
+            quest.exec()
+            if quest.result():
+                self.will_delete = True
+                self.parent.refresh()
+            self.is_delete_dialog_open = False
 
     def update(self):
         if self.will_delete:
@@ -373,6 +379,7 @@ class Part(QWidget):
                     description = '{self.textEdit.toPlainText()}', 
                     type = '{self.type}', date = '{self.date}' WHERE id = '{self.id}'""")
                 self.con.commit()
+                self.con.close()
             else:
                 self.con = sqlite3.connect('database.db')
                 self.cur = self.con.cursor()
@@ -382,6 +389,7 @@ class Part(QWidget):
                     f"""INSERT INTO Inbox(text, description, type, date) VALUES('{self.lineEdit_text}', 
                     '{self.textEdit_text}', '{self.type}', '{self.date}')""")
                 self.con.commit()
+                self.con.close()
 
     def is_checked(self):
         if self.checkBox == Qt.Checked:

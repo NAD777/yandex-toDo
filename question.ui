@@ -38,9 +38,9 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>100</x>
      <y>20</y>
-     <width>261</width>
+     <width>231</width>
      <height>21</height>
     </rect>
    </property>
@@ -85,6 +85,10 @@ background-color:rgb(43, 112, 246);</string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>accept_btn</tabstop>
+  <tabstop>reject_btn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

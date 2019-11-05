@@ -62,26 +62,6 @@
      <normaloff>icons/plus1.png</normaloff>icons/plus1.png</iconset>
    </property>
   </widget>
-  <widget class="QPushButton" name="refresh_btn">
-   <property name="geometry">
-    <rect>
-     <x>540</x>
-     <y>400</y>
-     <width>51</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border:none;</string>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>icons/reload.png</normaloff>icons/reload.png</iconset>
-   </property>
-  </widget>
  </widget>
  <resources/>
  <connections/>
