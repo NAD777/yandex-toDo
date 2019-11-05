@@ -53,7 +53,7 @@ class MainWindow(QMainWindow):
         self.open(Done())
 
     def clear_highlights(self):
-        # functions for clear highlights on main menu buttons
+        '''Functions for clear highlights on main menu buttons'''
         self.inbox_btn.setStyleSheet(
             "text-align: left; padding:5px; border:none; background-color: rgb(249, 250, 251); border-radius: 8px; padding-left:10px;")
         self.today_btn.setStyleSheet(
@@ -71,6 +71,7 @@ class MainWindow(QMainWindow):
 
 
 class ListWidget(QWidget):
+    '''Parrent class for all tabs'''
     def __init__(self, database_type_of_parts=None):
         super().__init__()
         uic.loadUi('content_widget.ui', self)
@@ -113,7 +114,7 @@ class ListWidget(QWidget):
         return self.cur.execute(f"""SELECT * FROM Inbox WHERE type = '{self.get_type()}'""")
 
     def mousePressEvent(self, event):
-        # when we click on an empty space the window is updated 
+        '''When we click on an empty space the window will update list of parts'''
         self.refresh()
 
     def add_part(self):
@@ -130,6 +131,7 @@ class ListWidget(QWidget):
 
 
 class Inbox(ListWidget):
+    '''Class for Inbox tab'''
     def __init__(self, *args):
         super().__init__(1)
         self.move_to_inbox_what_was_missed()
@@ -152,6 +154,7 @@ class Inbox(ListWidget):
 
 
 class Today(ListWidget):
+    '''Class for Today tab'''
     def __init__(self, *args):
         super().__init__(3)
         self.refresh()
@@ -174,6 +177,7 @@ class Today(ListWidget):
 
 
 class Plans(ListWidget):
+    '''Class for Plans tab'''
     def __init__(self, *args):
         super().__init__(3)
         self.refresh()
@@ -209,6 +213,7 @@ class Plans(ListWidget):
 
 
 class Plans_part(QWidget):
+    """Parts of List with date"""
     def __init__(self, text):
         super().__init__()
         uic.loadUi('part_plans.ui', self)
@@ -217,6 +222,7 @@ class Plans_part(QWidget):
 
 
 class Done(ListWidget):
+    '''Class for Done tasks tab'''
     def __init__(self, *args):
         super().__init__(4)
         self.add_btn.deleteLater()
