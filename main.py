@@ -112,8 +112,7 @@ class ListWidget(QWidget):
         self.refresh()
 
     def add_part(self):
-        part = Part()
-        part.delete_btn.clicked.connect(self.refresh)
+        part = Part(parent=self)
         self.scrollLayout.addRow(part)
         part.text_edit_clicked()
 
@@ -143,8 +142,7 @@ class Inbox(ListWidget):
         self.clean_list()
         res = self.get_res(self.get_type())
         for el in res:
-            part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4])
-            part.delete_btn.clicked.connect(self.refresh)
+            part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4], parent=self)
             self.scrollLayout.addRow(part)
 
 
@@ -161,15 +159,11 @@ class Today(ListWidget):
         self.clean_list()
         res = self.get_res(self.get_type())
         for el in res:
-            part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4])
-            part.clear_date_btn.clicked.connect(self.refresh)
+            part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4], parent=self)
             self.scrollLayout.addRow(part)
 
     def add_part(self):
-        part = Part(type=3, date=self.get_today_date())
-        part.something_changed = True
-        part.delete_btn.clicked.connect(self.refresh)
-        part.clear_date_btn.clicked.connect(self.refresh)
+        part = Part(type=3, date=self.get_today_date(), parent=self)
         self.scrollLayout.addRow(part)
         part.text_edit_clicked()
 
@@ -198,17 +192,12 @@ class Plans(ListWidget):
                 beautiful_date = f"<b>{day}</b> {mon_name} {year}"
                 self.scrollLayout.addRow(Plans_part(beautiful_date))
 
-            part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4])
-
-            part.clear_date_btn.clicked.connect(self.refresh)
-            part.set_date_btn.clicked.connect(self.refresh)
-            part.delete_btn.clicked.connect(self.refresh)
-
+            part = Part(id=el[0], text=el[1], desr=el[2], type=el[3], date=el[4], parent=self)
             self.scrollLayout.addRow(part)
             prev_date = date_of_el
 
     def add_part(self):
-        part = Part(type=self.get_type(), date=self.get_today_date())
+        part = Part(type=self.get_type(), date=self.get_today_date(), parent=self)
         part.update()
         self.refresh()
         part.text_edit_clicked()
@@ -236,14 +225,17 @@ class Done(ListWidget):
 
 
 class Part(QWidget):
-    def __init__(self, id=None, text=None, desr=None, type=None, date=None):
+    def __init__(self, id=None, text=None, desr=None, type=None, date=None, parent=None):
         super().__init__()
         uic.loadUi('part.ui', self)
+
         self.id = id
         self.text = text
         self.desr = desr
         self.type = type
         self.date = date
+        self.parent = parent
+
         if self.date == 'None':
             self.date = None
         if self.type is None:
@@ -313,8 +305,8 @@ class Part(QWidget):
         if selected_date != self.date:
             self.something_changed = True
             if self.type != 4:
-                self.hide()
                 self.type = 3
+                self.parent.refresh()
             else:
                 self.show_calendar()
             self.date = selected_date
@@ -340,7 +332,7 @@ class Part(QWidget):
             self.something_changed = True
             self.update()
             self.something_changed = False
-            self.hide()
+            self.parent.refresh()
         elif self.type == 4:
             self.is_showing = False
             if self.date is None:
@@ -355,15 +347,15 @@ class Part(QWidget):
             self.something_changed = True
             self.update()
             self.something_changed = False
-            self.hide()
+            self.parent.refresh()
 
     def delete(self):
         quest = Question("Удалить задачу?")
         quest.show()
         quest.exec()
         if quest.result():
-            self.hide()
             self.will_delete = True
+            self.parent.refresh()
 
     def update(self):
         if self.will_delete:
