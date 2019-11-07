@@ -77,28 +77,28 @@ class MainWindow(QMainWindow):
             """text-align: left; 
             padding:5px; 
             border:none; 
-            background-color: rgb(249, 250, 251); 
+            background-color: rgb(239, 240, 241); 
             border-radius: 8px; 
             padding-left:10px;""")
         self.today_btn.setStyleSheet(
             """text-align: left; 
             padding:5px;
             border:none; 
-            background-color: rgb(249, 250, 251); 
+            background-color: rgb(239, 240, 241); 
             border-radius: 8px; 
             padding-left:10px;""")
         self.plans_btn.setStyleSheet(
             """text-align: left; 
             padding:5px; 
             border:none; 
-            background-color: rgb(249, 250, 251); 
+            background-color: rgb(239, 240, 241); 
             border-radius: 8px; 
             padding-left:10px;""")
         self.logbook_btn.setStyleSheet(
             """text-align: left; 
             padding:5px; 
             border:none; 
-            background-color: rgb(249, 250, 251); 
+            background-color: rgb(239, 240, 241); 
             border-radius: 8px; 
             padding-left:10px;""")
 
