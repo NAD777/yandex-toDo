@@ -8,7 +8,7 @@ mccabe==0.6.1
 numpy==1.17.3
 pycodestyle==2.5.0
 pyflakes==2.1.1
-PyInstaller==3.5
+PyInstaller==3.6
 pylint==2.3.1
 PyQt5==5.13.1
 PyQt5-sip==4.19.19
